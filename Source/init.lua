@@ -135,15 +135,19 @@ end)
 DiscordClient:on("Ready", function()
 	print(`🎉 {DiscordClient.discordUser.username} is online!`)
 
-	-- local slashCommand = DiscordLuau.ApplicationCommand.new()
-	-- 	:setName("execute")
-	-- 	:setDescription("Execute lua(u) code inside of the Applications sandbox.")
+	local permissions = DiscordLuau.DiscordPermissions.new()
+		:addPermission(DiscordLuau.DiscordPermissions.Permissions.UseApplicationCommands)
 
-	-- DiscordClient.discordApplication:setSlashCommandsAsync({
-	-- 	slashCommand
-	-- }):after(function(data)
-	-- 	print(`🎯 Discord Slash Commands have been updated!`)
-	-- end)
+	local slashCommand = DiscordLuau.ApplicationCommand.new()
+		:setName("execute")
+		:setDescription("Execute lua(u) code inside of the Applications sandbox.")
+		:SetGuildPermissions(permissions)
+
+	DiscordClient.discordApplication:setSlashCommandsAsync({
+		slashCommand
+	}):after(function(data)
+		print(`🎯 Discord Slash Commands have been updated!`)
+	end)
 end)
 
 DiscordClient:connectAsync()
