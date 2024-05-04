@@ -30,14 +30,14 @@ end
 
 local function handleLifetimeCommand(interaction: DiscordLuau.DiscordInteraction)
 	local currentTime = os.time(os.date("!*t"))
-	local deltaTime = startTime - currentTime
+	local deltaTime = currentTime - startTime
 
-	local seconds: number = math.round(deltaTime)
-	local minutes: number = (seconds - deltaTime % 60) / 60
-	local hours: number = (minutes - minutes % 60) / 60
+	local _seconds = deltaTime
+	local minutes = (deltaTime - _seconds % 60) / 60
+	local hours = (minutes - minutes % 60) / 60
 
 	interaction:sendMessageAsync({
-		content = `Alive for; {string.format("%02i:%02i:%02i", hours, minutes - hours * 60, seconds - minutes * 60)} seconds!`
+		content = `Alive for; {string.format("%02i:%02i.%02i", minutes - hours * 60, _seconds - minutes * 60, (_seconds * 100) % 100)} seconds!`
 	})
 end
 
@@ -168,7 +168,7 @@ DiscordClient:on("Ready", function()
 	local discordPresence = DiscordLuau.DiscordPresence.new()
 	local discordActivity = DiscordLuau.DiscordActivity.new()
 
-	discordActivity:setActivityName("Lua(u) repository for updates!")
+	discordActivity:setActivityName("Lua(u)'s repository for updates!")
 	discordActivity:setActivityType(DiscordLuau.DiscordActivity.Type.Watching)
 
 	discordPresence:setStatus(DiscordLuau.DiscordPresence.Status.Idle)
@@ -176,7 +176,7 @@ DiscordClient:on("Ready", function()
 	discordPresence:setSince(0)
 
 	DiscordClient:updatePresenceAsync(discordPresence):after(function()
-		print(`Updated '{DiscordClient.discordUser.username}' preasence!`)
+		print(`👀 Updated '{DiscordClient.discordUser.username}' preasence!`)
 	end)
 
 	DiscordClient.discordApplication:setSlashCommandsAsync({
