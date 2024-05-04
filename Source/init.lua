@@ -37,7 +37,7 @@ local function handleLifetimeCommand(interaction: DiscordLuau.DiscordInteraction
 	local hours = (minutes - minutes % 60) / 60
 
 	interaction:sendMessageAsync({
-		content = `Alive for; {string.format("%02i:%02i.%02i", minutes - hours * 60, _seconds - minutes * 60, (_seconds * 100) % 100)} seconds!`
+		content = `Alive for; {string.format("%02i:%02i:%02i", hours, minutes - hours * 60, _seconds - minutes * 60)}!`
 	})
 end
 
