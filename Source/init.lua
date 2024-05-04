@@ -7,23 +7,36 @@ local Task = require("@lune/task")
 local DiscordSettings = DiscordLuau.DiscordSettings.new(Env.DISCORD_BOT_TOKEN)
 local DiscordClient = DiscordLuau.DiscordClient.new(DiscordSettings)
 
-local executeCodeModel = DiscordLuau.DiscordModal.new("code-modal")
-
-executeCodeModel:setTitle("Discord-Lua(u) Code Input")
-
-executeCodeModel:addComponent(
-	DiscordLuau.Components.ActionRowComponent.new()
-		:addComponent(
-			DiscordLuau.Components.TextInputComponent.new("text-input-0")
-				:setLabel("Lua(u) source code")
-				:setMinLength(1)
-				:setRequired(true)
-				:setStyle(DiscordLuau.Components.TextInputComponent.Style.Paragraph)
-		)
-)
+local startTime = os.time(os.date("!*t"))
 
 local function handleExecuteCommand(interaction: DiscordLuau.DiscordInteraction)
+	local executeCodeModel = DiscordLuau.DiscordModal.new("code-modal")
+
+	executeCodeModel:setTitle("Discord-Lua(u) Code Input")
+	
+	executeCodeModel:addComponent(
+		DiscordLuau.Components.ActionRowComponent.new()
+			:addComponent(
+				DiscordLuau.Components.TextInputComponent.new("text-input-0")
+					:setLabel("Lua(u) source code")
+					:setMinLength(1)
+					:setRequired(true)
+					:setStyle(DiscordLuau.Components.TextInputComponent.Style.Paragraph)
+			)
+	)
+
 	interaction:sendModalAsync(executeCodeModel)
+end
+
+local function handleLifetimeCommand(interaction: DiscordLuau.DiscordInteraction)
+	local currentTime = os.time(os.date("!*t"))
+	local deltaTime = startTime - currentTime
+
+	local seconds: number = math.round(deltaTime)
+	local minutes: number = (seconds - deltaTime % 60) / 60
+	local hours: number = (minutes - minutes % 60) / 60
+
+	interaction:sendMessageAsync(`Alive for; {string.format("%02i:%02i:%02i", hours, minutes - hours * 60, seconds - minutes * 60)} seconds!`)
 end
 
 local function handleExecution(interaction: DiscordLuau.DiscordInteraction)
@@ -127,6 +140,8 @@ end
 DiscordClient:on("Interaction", function(interaction: DiscordLuau.DiscordInteraction)
 	if interaction.data.name == "execute" then
 		handleExecuteCommand(interaction)
+	elseif interaction.data.name == "lifetime" then
+		handleLifetimeCommand(interaction)
 	elseif interaction.data.customId == "code-modal" then
 		handleExecution(interaction)
 	end
@@ -142,12 +157,18 @@ DiscordClient:on("Ready", function()
 		:setName("execute")
 		:setDescription("Execute lua(u) code inside of the Applications sandbox.")
 		:SetGuildPermissions(permissions)
+	
+	local lifetimeCommand = DiscordLuau.ApplicationCommand.new()
+		:setName("lifetime")
+		:setDescription("Query the lifetime of the current discord bot")
+		:SetGuildPermissions(permissions)
 
 	DiscordClient.discordApplication:setSlashCommandsAsync({
-		slashCommand
+		slashCommand, lifetimeCommand
 	}):after(function(data)
 		print(`🎯 Discord Slash Commands have been updated!`)
 	end)
 end)
 
+DiscordClient:setVerbose(true)
 DiscordClient:connectAsync()
