@@ -36,7 +36,9 @@ local function handleLifetimeCommand(interaction: DiscordLuau.DiscordInteraction
 	local minutes: number = (seconds - deltaTime % 60) / 60
 	local hours: number = (minutes - minutes % 60) / 60
 
-	interaction:sendMessageAsync(`Alive for; {string.format("%02i:%02i:%02i", hours, minutes - hours * 60, seconds - minutes * 60)} seconds!`)
+	interaction:sendMessageAsync({
+		content = `Alive for; {string.format("%02i:%02i:%02i", hours, minutes - hours * 60, seconds - minutes * 60)} seconds!`
+	})
 end
 
 local function handleExecution(interaction: DiscordLuau.DiscordInteraction)
@@ -162,6 +164,20 @@ DiscordClient:on("Ready", function()
 		:setName("lifetime")
 		:setDescription("Query the lifetime of the current discord bot")
 		:SetGuildPermissions(permissions)
+
+	local discordPresence = DiscordLuau.DiscordPresence.new()
+	local discordActivity = DiscordLuau.DiscordActivity.new()
+
+	discordActivity:setActivityName("Lua(u) repository for updates!")
+	discordActivity:setActivityType(DiscordLuau.DiscordActivity.Type.Watching)
+
+	discordPresence:setStatus(DiscordLuau.DiscordPresence.Status.Idle)
+	discordPresence:addActivity(discordActivity)
+	discordPresence:setSince(0)
+
+	DiscordClient:updatePresenceAsync(discordPresence):after(function()
+		print(`Updated '{DiscordClient.discordUser.username}' preasence!`)
+	end)
 
 	DiscordClient.discordApplication:setSlashCommandsAsync({
 		slashCommand, lifetimeCommand
